@@ -1,0 +1,4 @@
+.env
+*mysql_data*
+*.log*
+_dev

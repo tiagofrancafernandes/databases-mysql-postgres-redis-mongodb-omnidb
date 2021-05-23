@@ -1,0 +1,73 @@
+version: '3.7'
+services:
+  pg:
+    image: mdillon/postgis
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # - postgres:/var/lib/postgresql/data
+      - external-postgres-volume:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+  
+  omnidb:
+    image: taivokasper/omnidb
+    volumes:
+      # - config-omnidb:/etc/omnidb
+      - external-config-omnidb:/etc/omnidb
+    ports:
+      - "${OMNIDB_PORT:-8080}:8080"
+      - "25482:25482"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL:-pg@admin.com}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD:-postgres}"
+    ports:
+      - "${PGADMIN_PORT:-8090}:80"
+    depends_on:
+      - pg
+
+  #MySQL Service
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_DB_PASSWORD:-mysql}
+      MYSQL_DATABASE: "mysql"
+    ports:
+      - "${MYSQL_DB_PORT:-3306}:3306"
+    expose:
+      - ${MYSQL_DB_PORT:-3306}
+    volumes:
+      # - "$DOCKER_CONFIG_PATH/$MYSQL_DATA_DIR:/var/lib/mysql"
+      - external-mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  # postgres:
+  external-postgres-volume: #docker volume create external-config-omnidb
+    external: true
+  # config-omnidb:
+  external-config-omnidb: #docker volume create external-config-omnidb
+    external: true
+  # mysql-data:
+  external-mysql-data: #docker volume create external-mysql-data
+    external: true
+
