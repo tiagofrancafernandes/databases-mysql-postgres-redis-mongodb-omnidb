@@ -7,9 +7,12 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
+      - "1010:5432"
+      # - "5432:5432"
     volumes:
       # - postgres:/var/lib/postgresql/data
       - external-postgres-volume:/var/lib/postgresql/data
+      - ./_dev_local:/_dev_local
 
   redis:
     image: redis:latest
@@ -20,7 +23,7 @@ services:
     image: mongo:latest
     ports:
       - "${MONGO_PORT:-27017}:27017"
-  
+
   omnidb:
     image: taivokasper/omnidb
     volumes:
@@ -56,18 +59,51 @@ services:
     networks:
       - app-network
 
+  mailhog:
+    image: mailhog/mailhog
+    restart: always
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025" ## SMTP Port
+      - "${MAILHOG_WEB_UI_PORT:-8025}:8025" ## Web UI PORT
+    networks:
+      app-network:
+        aliases:
+          - ${MAILHOG_VIRTUAL_HOST:-mailhog.local}
+          - mailhog
+
+  php:
+    image: php:8.1-rc-fpm-alpine
+    tty: true
+    ports:
+      - "${PHP_DEV_SERVER_PORT:-7000}:7000"
+    volumes:
+      - "${PHP_DEV_SERVER_BASE_PATH:-./docker/php-utils/}:/var/www/apps"
+    networks:
+      app-network:
+        aliases:
+          - php-dev.local
+    command: "php -S 0.0.0.0:7000 -t /var/www/apps"
+
 #Docker Networks
 networks:
   app-network:
     driver: bridge
+
 volumes:
   # postgres:
   external-postgres-volume: #docker volume create external-config-omnidb
     external: true
+
+  ## Container volume
   # config-omnidb:
+
+  ## Docker external volume (can be reused for another container)
   external-config-omnidb: #docker volume create external-config-omnidb
     external: true
+
+  ## Container volume
   # mysql-data:
+
+  ## Docker external volume (can be reused for another container)
   external-mysql-data: #docker volume create external-mysql-data
     external: true
-
