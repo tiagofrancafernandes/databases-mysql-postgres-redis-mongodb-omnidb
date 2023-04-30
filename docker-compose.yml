@@ -59,16 +59,30 @@ services:
     networks:
       - app-network
 
-  mailhog:
-    image: mailhog/mailhog
+  # mailhog:
+  #   image: mailhog/mailhog
+  #   restart: always
+  #   ports:
+  #     - "${MAILHOG_SMTP_PORT:-1025}:1025" ## SMTP Port
+  #     - "${MAILHOG_WEB_UI_PORT:-8025}:8025" ## Web UI PORT
+  #   networks:
+  #     app-network:
+  #       aliases:
+  #         - ${MAILHOG_VIRTUAL_HOST:-mailhog.local}
+  #         - mailhog
+
+  mailpit:
+    image: axllent/mailpit
     restart: always
     ports:
-      - "${MAILHOG_SMTP_PORT:-1025}:1025" ## SMTP Port
-      - "${MAILHOG_WEB_UI_PORT:-8025}:8025" ## Web UI PORT
+      - "${MAILPIT_SMTP_PORT:-1025}:1025" ## SMTP Port
+      - "${MAILPIT_WEB_UI_PORT:-8025}:8025" ## Web UI PORT
     networks:
       app-network:
         aliases:
+          - ${MAILPIT_VIRTUAL_HOST:-mailpit.local}
           - ${MAILHOG_VIRTUAL_HOST:-mailhog.local}
+          - mailpit
           - mailhog
 
   php:
