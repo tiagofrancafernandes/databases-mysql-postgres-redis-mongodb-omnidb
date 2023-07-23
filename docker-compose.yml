@@ -7,8 +7,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
-      - "1010:5432"
-      # - "5432:5432"
+      #- "1010:5432"
+      #- "5432:5432"
     volumes:
       # - postgres:/var/lib/postgresql/data
       - external-postgres-volume:/var/lib/postgresql/data
@@ -98,6 +98,67 @@ services:
           - php-dev.local
     command: "php -S 0.0.0.0:7000 -t /var/www/apps"
 
+  minio1:
+      image: minio/minio:RELEASE.2020-08-18T19-41-00Z
+      # container_name: db-app-minio1
+      volumes:
+          # - minio-data1-1:/data1
+          # - minio-data1-2:/data2
+          - "${MINIO_DATA_NODE1:-./docker/minio_data/nodes/node1}/data1:/data1"
+          - "${MINIO_DATA_NODE1:-./docker/minio_data/nodes/node1}/data2:/data2"
+      ports:
+          - "${MINIO_WEB:-9001}:9000" ## Usado para versão Web
+          - "${MINIO_CONSOLE_WEB:-9091}:9090" ## Usado para versão Web do Console
+      environment:
+          MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+          MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+          MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
+          MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-password}
+      command: server http://minio{1...2}/data{1...2}
+      healthcheck:
+          test:
+              [
+                  "CMD",
+                  "curl",
+                  "-f",
+                  "http://localhost:9000/minio/health/live"
+              ]
+          interval: 30s
+          timeout: 20s
+          retries: 3
+      networks:
+        - app-network
+      depends_on:
+        - minio2
+
+  minio2:
+      image: minio/minio:RELEASE.2020-08-18T19-41-00Z
+      # container_name: db-app-minio2
+      volumes:
+        #   - minio-data2-1:/data1
+        #   - minio-data2-2:/data2
+          - "${MINIO_DATA_NODE2:-./docker/minio_data/nodes/node2}/data1:/data1"
+          - "${MINIO_DATA_NODE2:-./docker/minio_data/nodes/node2}/data2:/data2"
+      environment:
+          MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+          MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+          MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
+          MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-password}
+      command: server http://minio{1...2}/data{1...2}
+      healthcheck:
+          test:
+              [
+                  "CMD",
+                  "curl",
+                  "-f",
+                  "http://localhost:9000/minio/health/live"
+              ]
+          interval: 30s
+          timeout: 20s
+          retries: 3
+      networks:
+        - app-network
+
 #Docker Networks
 networks:
   app-network:
@@ -121,3 +182,9 @@ volumes:
   ## Docker external volume (can be reused for another container)
   external-mysql-data: #docker volume create external-mysql-data
     external: true
+
+  # ## Caso queira utilizar volumes dinâmicos, descomente as linhas de baixo e mude a sessão volumes de services.minio1 e services.minio2
+  # minio-data1-1:
+  # minio-data1-2:
+  # minio-data2-1:
+  # minio-data2-2:
