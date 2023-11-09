@@ -1,7 +1,12 @@
 version: '3.7'
 services:
   pg:
-    image: mdillon/postgis
+    # image: postgres:15
+    # image: mdillon/postgis:11-alpine
+    # image: postgis/postgis:15-alpine
+    # image: postgis/postgis:14-3.3-alpine
+    # image: postgis/postgis:latest
+    image: postgis/postgis:14-3.3-alpine
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
