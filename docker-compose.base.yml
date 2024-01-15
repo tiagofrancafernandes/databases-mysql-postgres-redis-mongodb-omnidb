@@ -214,6 +214,10 @@ volumes:
   external-mysql-data: #docker volume create external-mysql-data
     external: true
 
+  ## Docker external volume (can be reused for another container)
+  external-mariadb-data: #docker volume create external-mariadb-data
+    external: true
+
   # ## Caso queira utilizar volumes dinâmicos, descomente as linhas de baixo e mude a sessão volumes de services.minio1 e services.minio2
   # minio-data1-1:
   # minio-data1-2:
