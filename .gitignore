@@ -3,3 +3,4 @@
 *.log*
 _dev
 docker-compose.yml
+utils/start-basic-dbs.sh
