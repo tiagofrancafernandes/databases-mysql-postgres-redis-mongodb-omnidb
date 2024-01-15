@@ -14,7 +14,8 @@ fi
 
 DOCKER_COMPOSE_BIN=${DOCKER_COMPOSE_BIN:-/usr/local/bin/docker-compose}
 #DEFAULT_SERVICE="redis pg mysql mongodb mailhog php"
-DEFAULT_SERVICE="redis pg mysql mailpit minio1"
+# DEFAULT_SERVICE="redis pg mysql mailpit minio1"
+DEFAULT_SERVICE="redis pg mysql mailpit minio1 mariadb"
 SERVICES_TO_START=${SERVICES_TO_START:-${DEFAULT_SERVICE}}
 
 echo -e "Runing file:"
