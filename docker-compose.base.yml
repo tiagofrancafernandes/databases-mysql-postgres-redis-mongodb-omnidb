@@ -64,6 +64,32 @@ services:
     networks:
       - app-network
 
+  mariadb:
+    image: 'mariadb:10'
+    ports:
+        - '${MARIADB_PORT:-3306}:3306'
+    environment:
+        MYSQL_ROOT_PASSWORD: '${MARIADB_PASSWORD}'
+        MYSQL_ROOT_HOST: '%'
+        MYSQL_DATABASE: '${MARIADB_DATABASE}'
+        MYSQL_USER: '${MARIADB_USERNAME}'
+        MYSQL_PASSWORD: '${MARIADB_PASSWORD}'
+        MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+        # - 'sail-mariadb:/var/lib/mysql'
+        - external-mariadb-data:/var/lib/mysql
+        - './docker/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+    networks:
+        - app-network
+    healthcheck:
+        test:
+            - CMD
+            - mysqladmin
+            - ping
+            - '-p${MARIADB_PASSWORD}'
+        retries: 3
+        timeout: 5s
+
   # mailhog:
   #   image: mailhog/mailhog
   #   restart: always
